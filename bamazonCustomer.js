@@ -12,7 +12,7 @@
 
 
 var mysql = require ("mysql");
-var inquirer = require("inquire");
+var inquirer = require("inquirer");
 
 var connection = mysql.createConnection({
     host: "localhost",
@@ -27,34 +27,40 @@ var connection = mysql.createConnection({
 
 connection.connect(function(err) {
     if (err) throw err;
-    console.log("connected as id ");
+    console.log("connected!");
     // run the start function after the connection is made to prompt the user
     start();
 });
 
 
 // First user prompt "What is the the item ID number of the product you would like to purchase"
-function start() {
+ function start() {
 
-    console.log("Items For Sale: " /n + "Coffee Mug" + "Lancome Mascara" + "Nike Hoodie" + "Chaise Lounge" + "How to Learn Node Js for For Dummies" +
-"Satin Pillowcases" + "Madden" + "MacBook Pro Laptop" + "Christian Loubotin" + "I Love Coding T-Shirt");
-  inquirer
+     console.log(
+      "Items For Sale: \n Coffee Mug \n Lancome Mascara \n Nike Hoodie \n  Lounge Chair \n How to Learn Node Js for For Dummies \n Satin Pillowcases \n NBA 2K \n MacBook Pro Laptop \n Christian Loubotin \n I Love Coding T-Shirt");
+  
+      inquirer
     .prompt({
-      name: "userPurchase",
-      type: "itemList",
-      message: "What is  the item ID number of the product you would like to purchase??",
-      choices: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+      name: "item_id",
+      type: "input",
+      message: "What is the item ID number of the product you would like to purchase??",
+    },
+    {
+      name: "quantity",
+      type: "input",
+      message: "How many would you like to"
+
     })
-    .then(function(answer) {
-      // based on their answer, either call the bid or the post functions
-      if (answer.userPurchase === choices) {
-        itemSelected();
-      }
-      else {
-        console.log("Are you sure you want to leave this page?");
-      }
-    });
-}
+//     .then(function(answer) {
+//       // based on their answer, either call the bid or the post functions
+//       if (answer.userPurchase === choices) {
+//         itemSelected();
+//       }
+//       else {
+//         console.log("Are you sure you want to leave this page?");
+//       }
+//     });
+ }
 
 // // Second user prompt "How many units would you like to purchase of this item?"
 // function itemSelected() {
