@@ -13,6 +13,7 @@
 
 var mysql = require ("mysql");
 var inquirer = require("inquirer");
+const cTable = require('console.table');
 
 var connection = mysql.createConnection({
     host: "localhost",
@@ -27,31 +28,166 @@ var connection = mysql.createConnection({
 
 connection.connect(function(err) {
     if (err) throw err;
-    console.log("connected!");
+    console.log("Welcome to the Bamazon Store! Please see our items for sale!");
     // run the start function after the connection is made to prompt the user
-    start();
+    // start();
+
+    ProductList();
 });
+
+var ProductList = function() {
+	connection.query('SELECT * FROM products', function (error, results) {
+	  if (error) throw error;
+	  
+    var products = results;
+
+    // console.table
+    // (results);
+
+    purchaseProducts(products);
+	});
+};
+
+// Ask user which product to purchase
+var purchaseProducts = function(products) {
+  inquirer.prompt([{
+    name: 'choice',
+    type: 'list',
+    pageSize: 100,
+    message: "What product would you like to purchase?",
+    choices: function(value){
+      var productsArray =[];
+      // loop through products and return array for choices
+      for (var index = 0; index < products.length; index++) {
+        productsArray.push({
+          name:  products[index].product_name +' - $'+ products[index].price,
+          value: products[index].item_id,
+          short: products[index].product_name
+        });
+      }
+      return productsArray;
+    }
+  }]).then(function (answers) {
+
+    for (var index = 0; index < products.length; index++) {
+      if(products[index].item_id === answers.choice) {
+
+        // Store product purchased obj
+        var prodPurchased = products[index];
+        
+        // Ask User how many to buy
+        inquirer.prompt([{
+          name: 'choice',
+          type: 'input',
+          message: "How many would you like to buy?",
+          // Validate if value a number
+          validate: function(value) { 
+            if ( isNaN(value) ) { 
+              console.log('\n Please provide a number for the item you/d like to purchase'); 
+              return false; 
+            } else if( value <= 0 ) {
+              console.log('\n To select an item, please provide a number greater than 0'); 
+              return false; 
+            } else {
+              return true;
+            }
+          },
+        }]).then(function (answers) {
+
+          // Store Qty
+          var prodQtyPurchased = parseInt(answers.choice);
+          var newQty = parseInt(prodPurchased.stock_quantity) - parseInt(prodQtyPurchased);
+          var totalSale = prodPurchased.price * parseInt(prodQtyPurchased);
+          var currentSales = prodPurchased.product_sales + totalSale;
+
+          // Check if there's enough in stock \
+        console.log(prodPurchased.stock_quantity, prodQtyPurchased);
+        console.log(prodPurchased.stock_quantity >= prodQtyPurchased);
+          if(prodPurchased.stock_quantity >= prodQtyPurchased) {
+            // Update quantity purchased in DB
+            // var query = connection.query(
+            //   "UPDATE products SET ? WHERE ?",
+            //   [
+            //     {
+            //       stock_quantity: newQty,
+            //       product_sales: currentSales
+            //     },
+            //     {
+            //       item_id: prodPurchased.item_id
+            //     }
+            //   ],
+            //   function(err, res) {
+            //     if(err) throw err;
+            //     // console.log(res.affectedRows + " product updated!\n");
+            //   }
+            // );
+            // connection.query(
+            //     "SELECT products.product_name, products.stock_quantity WHERE item_id = ?",
+            //         [
+            //     {
+            //         item_id: prodPurchased.item_id
+            //     }
+            // ],
+            
+            //     function(err, res) {
+            //       if(err) throw err;
+            //       console.log(err);
+            //        console.table(res);
+            //     }
+            //   );
+    //   Get a working sql statement manually 
+    // documentation 
+
+
+            // logs the actual query being run
+            // console.log(query.sql);
+            console.log('\nTotal Cost: $' +  totalSale + '\n');
+            ProductList();
+
+          } else {
+            console.log('\nSorry Insufficient quantity!\n');
+            ProductList();
+          }
+
+        
+
+          
+
+        });
+      }
+    }
+
+  });
+
+
+}
+
+
+
+
+
+
 
 
 // First user prompt "What is the the item ID number of the product you would like to purchase"
- function start() {
+//  function start() {
 
-     console.log(
-      "Items For Sale: \n Coffee Mug \n Lancome Mascara \n Nike Hoodie \n  Lounge Chair \n How to Learn Node Js for For Dummies \n Satin Pillowcases \n NBA 2K \n MacBook Pro Laptop \n Christian Loubotin \n I Love Coding T-Shirt");
+//      console.log(
+//       "Items For Sale: \n Coffee Mug \n Lancome Mascara \n Nike Hoodie \n  Lounge Chair \n How to Learn Node Js for For Dummies \n Satin Pillowcases \n NBA 2K \n MacBook Pro Laptop \n Christian Loubotin \n I Love Coding T-Shirt");
   
-      inquirer
-    .prompt({
-      name: "item_id",
-      type: "input",
-      message: "What is the item ID number of the product you would like to purchase??",
-    },
-    {
-      name: "quantity",
-      type: "input",
-      message: "How many would you like to"
+//       inquirer
+//     .prompt({
+//       name: "item_id",
+//       type: "input",
+//       message: "What is the item ID number of the product you would like to purchase??",
+//     },
+//     {
+//       name: "quantity",
+//       type: "input",
+//       message: "How many would you like to"
 
-    })
-//     .then(function(answer) {
+//     })
+// //     .then(function(answer) {
 //       // based on their answer, either call the bid or the post functions
 //       if (answer.userPurchase === choices) {
 //         itemSelected();
@@ -59,8 +195,8 @@ connection.connect(function(err) {
 //       else {
 //         console.log("Are you sure you want to leave this page?");
 //       }
-//     });
- }
+// //     });
+//  }
 
 // // Second user prompt "How many units would you like to purchase of this item?"
 // function itemSelected() {
@@ -107,4 +243,4 @@ connection.connect(function(err) {
 //         }
 //       );
 //     });
-// }
+//  }

@@ -9,7 +9,9 @@ product_name VARCHAR (60),
 department_name VARCHAR (30),
 price DECIMAL (10, 2),
 stock_quantity INTEGER (10),
+product_sales INTEGER (50),
 PRIMARY KEY (item_id)
+
 );
 
 -- Insertion of Values --
